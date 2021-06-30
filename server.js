@@ -11,7 +11,14 @@ app.options('*', cors());
 
 
 const mongoDB = process.env.MONGO_URL;
-mongoose.connect(mongoDB);
+mongoose.connect(
+	"mongodb+srv://lentsa:PetraCovac@lentsa-petracovac.dlnhr.mongodb.net/lentsapetracovacdb?retryWrites=true&w=majority",
+	{
+	  useNewUrlParser: true,
+	  useFindAndModify: false,
+	  useUnifiedTopology: true
+	} || mongoDB
+  );
 mongoose.Promise = global.Promise;
 const db = mongoose.connection
 

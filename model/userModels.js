@@ -6,7 +6,7 @@ const AccountModels = Schema({
     username : {type:String},
     email : {type:String},
     password : {type:String},
-    profilePic: {type:String}
+    role: {type:String}
 })
 
 //Contoh

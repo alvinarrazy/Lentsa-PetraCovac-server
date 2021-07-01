@@ -1,54 +1,63 @@
-const AccountModels = require("../model/accountModels")
+const UserModels = require("../model/userModels")
+const AdminModels = require("../model/userModels")
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
- exports.register = function(req,res){
-    AccountModels.find({ username: req.body.username })//cancel jika ada username yang sama
+exports.registerAdmin = function (req, res) {
+  AdminModels.find({ username: req.body.username })//cancel jika ada username yang sama
     .exec()
-    .then(user => {
-        if (user.length >= 1) {
-          return res.status(409).json({
-            message: "Username exists"
-          });//belum keluar apa2 di tampilan, mungkin bisa ditambahin
-        }else{
-            bcrypt.hash(req.body.password, 10, (err, hash) => {
-                if (err) {
-                  return res.status(500).json({
-                    error: err
-                  });
-                } else {
-                    // if(!req.file){
-                    //   return res.send('belum ada')
-                    // }
-                    let accountModels = new AccountModels({
-                        fullname : req.body.fullname,
-                        username : req.body.username,
-                        email : req.body.email,
-                        password : hash,
-                        profilePic : req.file.path
-                    });
-                    accountModels.save(function(err){
-                        if(err){
-                            return next(err)
-                        }
-                    console.log(accountModels.username + " berhasil ditambah")
-                    });
-                }
-            })
-        }
+    .then(result => {
+      if (result.length >= 1) {
+        return res.status(409).json({
+          message: "Username exists"
+        });
+      } else {
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+          if (err) {
+            return res.status(500).json({
+              error: err
+            });
+          } else {
+            // if(!req.file){
+            //   return res.send('belum ada')
+            // }
+            let AdminModels = new AdminModels({
+              username: req.body.username,
+              email: req.body.email,
+              password: hash
+            });
+            AdminModels.save()
+              .then(result => {
+                res.status(201).json({
+                  message: result.username + " berhasil ditambahkan sebagai admin baru",
+                  createdAdmin: {
+                    username: result.username,
+                    email: result.email,
+                    hashedPassword: result.password
+                  }
+                })
+              })
+              .catch(er => {
+                res.status(500).json({
+                  error: er
+                })
+              })
+          }
+        })
+      }
     })
- }
+}
 
- exports.login = function(req,res){    
-    AccountModels.find({ username: req.body.username })
+exports.loginAdmin = function (req, res) {
+  AdminModels.find({ username: req.body.username })
     .exec()
-    .then(user => {
-      if (user.length < 1) {
+    .then(result => {
+      if (result.length < 1) {
         return res.status(401).json({
-          message: "Auth failed"
+          message: "Username Admin tidak ditemukan"
         });
       }
-      bcrypt.compare(req.body.password, user[0].password, (err, result) => {
+      bcrypt.compare(req.body.password, result[0].password, (err, result) => {
         if (err) {
           return res.status(401).json({
             message: "Auth failed"
@@ -57,33 +66,26 @@ const jwt = require('jsonwebtoken');
         if (result) {
           const token = jwt.sign(
             {
-              fullname: user[0].fullname,
-              email: user[0].email,
-              username: user[0].username,
-              userId: user[0]._id
+              email: result[0].email,
+              username: result[0].username,
+              userId: result[0]._id
             },
             "secret",
             {
-                expiresIn: "1h"
+              expiresIn: "1h"
             }
           );
-          console.log(user[0].username + " berhasil login"); 
-          let responseJson = {
-              fullname: user[0].fullname,
-              email: user[0].email,
-              username: user[0].username,
-              token: token
-          }
           return res.json({
-              fullname: user[0].fullname,
-              email: user[0].email,
-              username: user[0].username,
-              token: token
+            fullname: result[0].fullname,
+            email: result[0].email,
+            username: result[0].username,
+            token: token
+          });
+        }else{
+          res.status(401).json({
+            message: "Auth failed"
           });
         }
-        res.status(401).json({
-          message: "Auth failed"
-        });
       });
     })
     .catch(err => {
@@ -94,20 +96,20 @@ const jwt = require('jsonwebtoken');
     });
 
 
-    //////////////////////////////////////////////////yang lama//////////////////////////////
-    // const accountModels = new AccountModels;
-    // //Harus manggil langsung imported file nya, gk tau kenapa (gk bisa kalo manggil yang accountModels)
-    // AccountModels.find({username: req.body.username, password: req.body.password},function(err,res){
-    //     if(res.length>0){
-    //         console.log(req.body.username + " berhasil ditemukan");
-    //     }else if(err){
-    //         return next(err);
-    //     }else{
-    //         console.log("Tidak ditemukan")
-    //     }
-        
-    // })  
- 
+  //////////////////////////////////////////////////yang lama//////////////////////////////
+  // const UserModels = new UserModels;
+  // //Harus manggil langsung imported file nya, gk tau kenapa (gk bisa kalo manggil yang UserModels)
+  // UserModels.find({username: req.body.username, password: req.body.password},function(err,res){
+  //     if(res.length>0){
+  //         console.log(req.body.username + " berhasil ditemukan");
+  //     }else if(err){
+  //         return next(err);
+  //     }else{
+  //         console.log("Tidak ditemukan")
+  //     }
+
+  // })  
+
 }
 
 //Contoh
@@ -120,13 +122,13 @@ const jwt = require('jsonwebtoken');
 //         name : req.body.name,
 //         done: false
 //     });
-    
+
 //     todos.save(function(err){
 //         if(err){
 //             return next(err)
 //         }
 //     res.send("sukses nge mantab")
 //     })  
-     
+
 // };
 

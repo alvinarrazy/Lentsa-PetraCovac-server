@@ -1,10 +1,10 @@
-const UserModels = require("../model/userModels")
-const AdminModels = require("../model/userModels")
+const userModels = require("../model/userModels")
+const adminModels = require("../model/adminModels")
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.registerAdmin = function (req, res) {
-  AdminModels.find({ username: req.body.username })//cancel jika ada username yang sama
+  adminModels.find({ username: req.body.username })//cancel jika ada username yang sama
     .exec()
     .then(result => {
       if (result.length >= 1) {
@@ -21,19 +21,21 @@ exports.registerAdmin = function (req, res) {
             // if(!req.file){
             //   return res.send('belum ada')
             // }
-            let AdminModels = new AdminModels({
+            let newAdmin = new adminModels({
               username: req.body.username,
               email: req.body.email,
-              password: hash
+              password: hash,
+              role: "admin"
             });
-            AdminModels.save()
+            newAdmin.save()
               .then(result => {
                 res.status(201).json({
                   message: result.username + " berhasil ditambahkan sebagai admin baru",
                   createdAdmin: {
                     username: result.username,
                     email: result.email,
-                    hashedPassword: result.password
+                    hashedPassword: result.password,
+                    role: result.role
                   }
                 })
               })
@@ -49,7 +51,7 @@ exports.registerAdmin = function (req, res) {
 }
 
 exports.loginAdmin = function (req, res) {
-  AdminModels.find({ username: req.body.username })
+  adminModels.find({ username: req.body.username })
     .exec()
     .then(result => {
       if (result.length < 1) {
@@ -57,7 +59,7 @@ exports.loginAdmin = function (req, res) {
           message: "Username Admin tidak ditemukan"
         });
       }
-      bcrypt.compare(req.body.password, result[0].password, (err, result) => {
+      bcrypt.compare(req.body.password, result[0].password, (err) => {
         if (err) {
           return res.status(401).json({
             message: "Auth failed"
@@ -68,7 +70,7 @@ exports.loginAdmin = function (req, res) {
             {
               email: result[0].email,
               username: result[0].username,
-              userId: result[0]._id
+              _id: result[0]._id
             },
             "secret",
             {
@@ -76,7 +78,6 @@ exports.loginAdmin = function (req, res) {
             }
           );
           return res.json({
-            fullname: result[0].fullname,
             email: result[0].email,
             username: result[0].username,
             token: token

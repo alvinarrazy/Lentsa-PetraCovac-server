@@ -9,5 +9,7 @@ exports.testLive = function (req, res) {
 exports.testIfAdminLogin = function (req, res) {
     if (!req.adminLoginData) {
         return res.json({ message: "Unauthenticated" });
+    }else{
+        return res.json({adminLoginDataId: req.adminLoginData._id})
     }
 }

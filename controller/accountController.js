@@ -1,7 +1,8 @@
-const userModels = require("../model/userModels")
-const adminModels = require("../model/adminModels")
+const userModels = require("../model/userModels");
+const adminModels = require("../model/adminModels");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const {adminSecret, userSecret} = require ('../config');
 
 exports.registerAdmin = function (req, res) {
   adminModels.find({ username: req.body.username })//cancel jika ada username yang sama
@@ -72,12 +73,12 @@ exports.loginAdmin = function (req, res) {
               username: result[0].username,
               _id: result[0]._id
             },
-            "secret",
+            adminSecret,
             {
               expiresIn: "1h"
             }
           );
-          return res.json({
+          return res.status(201).json({
             email: result[0].email,
             username: result[0].username,
             token: token

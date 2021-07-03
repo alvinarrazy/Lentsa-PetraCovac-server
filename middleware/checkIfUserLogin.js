@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
-const {adminSecret} = require('../config');
+const {userSecret} = require('../config');
 module.exports = async (req, res, next) => {
 
 
     try {
         //console.log("authorization!!!= "+ req.headers.authorization);
         const token = req.headers.authorization;
-        const decoded = jwt.verify(token, adminSecret);
+        const decoded = jwt.verify(token, userSecret);
         req.adminLoginData = decoded;
         console.log(req.adminLoginData)
         next();

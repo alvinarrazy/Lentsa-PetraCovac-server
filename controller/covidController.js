@@ -3,6 +3,40 @@ const { json } = require("body-parser");
 const desaModels = require("../model/desaModels");
 const kecamatanModels = require("../model/kecamantanModels");
 
+async function checkIfKecamatanExist(desa) {
+  try {
+    result = await kecamatanModels.find({ nama_kecamatan: desa.nama_kecamatan }).exec()
+    if (result.length >= 1) return result
+    else return false
+  }
+  catch {
+    console.log("Err")
+  }
+}
+
+
+//lower Case JSON
+function keysToLowerCase(obj) {
+  if (obj instanceof Array) {
+    for (var i in obj) {
+      obj[i] = keysToLowerCase(obj[i]);
+    }
+  }
+  if (!typeof (obj) === "object" || typeof (obj) === "string" || typeof (obj) === "number" || typeof (obj) === "boolean") {
+    return obj;
+  }
+  var keys = Object.keys(obj);
+  var n = keys.length;
+  var lowKey;
+  while (n--) {
+    var key = keys[n];
+    if (key === (lowKey = key.toLowerCase()))
+      continue;
+    obj[lowKey] = keysToLowerCase(obj[key]);
+    delete obj[key];
+  }
+  return (obj);
+}
 
 //Ambil data 1 kecamatan berdasarkan nama
 exports.getOneKecamatan = function (req, res) {
@@ -21,7 +55,7 @@ exports.getOneKecamatan = function (req, res) {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({
+      res.status(500).send({
         error: err
       });
     });
@@ -45,7 +79,7 @@ exports.getAllKecamatan = function (req, res) {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({
+      res.status(500).send({
         error: err
       });
     });
@@ -76,7 +110,7 @@ exports.tambahKecamatan = function (req, res) {
           })
         })
         .catch(er => {
-          res.status(500).json({
+          res.status(500).send({
             error: er
           })
         })
@@ -84,17 +118,32 @@ exports.tambahKecamatan = function (req, res) {
     })
 }
 
+//tambah data dengan CSV
+exports.tambahKecamatanCSV = function (req, res) {
+  var jsonFile = keysToLowerCase(req.body);
+  var paketDataBaru = []
+  jsonFile.map(kecamatan => {
+    paketDataBaru.push(kecamatan);
+  })
+  kecamatanModels.insertMany(paketDataBaru)
+    .then(result => {
+      res.status(201).send(result)
+    })
+    .catch(er => {
+      res.status(500).send({ error: er })
+    })
+}
 //Update data kecamatan
 exports.updateDataKecamatan = function (req, res) {
   const namaKecamatanYangInginDiganti = req.params.namaKecamatan
   const namaKecamatanBaru = req.body.nama_kecamatan_baru
   // console.log(namaKecamatanYangInginDiganti)
   //Mencari apakah nama kecamatan sudah ada
-  kecamatanModels.find({nama_kecamatan: namaKecamatanYangInginDiganti})
-  .exec()
-  .then(resultPencarian => {
-    if(resultPencarian.length < 1) return res.status(401).json({message: "nama kecamatan tidak ada"})
-  })
+  kecamatanModels.find({ nama_kecamatan: namaKecamatanYangInginDiganti })
+    .exec()
+    .then(resultPencarian => {
+      if (resultPencarian.length < 1) return res.status(401).json({ message: "nama kecamatan tidak ada" })
+    })
   kecamatanModels.findOneAndUpdate(
     { nama_kecamatan: namaKecamatanYangInginDiganti },
     {
@@ -107,11 +156,13 @@ exports.updateDataKecamatan = function (req, res) {
     }
   ).then(result => {
     desaModels.updateMany(
-      {nama_kecamatan: namaKecamatanYangInginDiganti},
-      {$set: {
-        nama_kecamatan: namaKecamatanBaru
-      }},
-      {upsert: false}
+      { nama_kecamatan: namaKecamatanYangInginDiganti },
+      {
+        $set: {
+          nama_kecamatan: namaKecamatanBaru
+        }
+      },
+      { upsert: false }
     ).exec()
     if (namaKecamatanYangInginDiganti == namaKecamatanBaru) {
       return res.status(201).json({
@@ -133,7 +184,7 @@ exports.updateDataKecamatan = function (req, res) {
   })
     .catch(err => {
       console.log(err);
-      return res.status(500).json({
+      return res.status(500).send({
         error: err
       });
     })
@@ -167,10 +218,12 @@ exports.tambahDesa = function (req, res) {
             suspek: req.body.suspek,
             discharded: req.body.discharded,
             meninggal: req.body.meninggal,
+            keterangan: req.body.keterangan,
             konfirmasi_symptomatik: req.body.konfirmasi_symptomatik,
             konfirmasi_asymptomatik: req.body.konfirmasi_asymptomatik,
             konfirmasi_sembuh: req.body.konfirmasi_sembuh,
-            konfirmasi_meninggal: req.body.konfirmasi_meninggal
+            konfirmasi_meninggal: req.body.konfirmasi_meninggal,
+            keterangan_konfirmasi: req.body.keterangan_konfirmasi
           });
           dataBaru.save()
             .then(result => {
@@ -196,7 +249,7 @@ exports.tambahDesa = function (req, res) {
               });
             })
             .catch(err => {
-              res.status(500).json({
+              res.status(500).send({
                 error: err
               });
             });
@@ -204,6 +257,25 @@ exports.tambahDesa = function (req, res) {
     })
 
 }
+
+exports.tambahDesaCSV = function (req, res) {
+  const jsonFile = keysToLowerCase(req.body);
+  jsonFile.map(desa => {
+    var checking = checkIfKecamatanExist(desa)
+    checking.then(result => {
+      if (result.length >= 1) {
+        desa.id_kecamatan = result[0]._id
+        desaModels.create(desa)
+         .catch(er => {
+           return res.status(500).send({error: er})
+        })
+      } else {
+        console.log("Desa tidak diterima", desa)
+      }
+    })
+  })
+}
+
 
 exports.updateDataDesa = function (req, res) {
   var idKecamatanBaru;
@@ -213,80 +285,88 @@ exports.updateDataDesa = function (req, res) {
   const suspekBaru = req.body.suspek_baru;
   const dischardedBaru = req.body.discharded_baru;
   const meninggalBaru = req.body.meninggal_baru;
+  const keteranganBaru = req.body.keterangan_baru;
   const konfirmasiSymptomatikBaru = req.body.konfirmasi_asymptomatik_baru;
   const konfirmasiAsymptomatikBaru = req.body.konfirmasi_symptomatik_baru;
   const konfirmasiSembuhBaru = req.body.konfirmasi_sembuh_baru;
   const konfirmasiMeninggalBaru = req.body.konfirmasi_meninggal_baru;
+  const keteranganKonfirmasiBaru = req.body.keterangan_konfirmasi_baru
 
   //cek nama desa
-  desaModels.find({nama_desa: namaDesaYangInginDiganti})
-  .exec()
-  .then(resultPencarian =>{
-    if(resultPencarian.length < 1) return res.status(401).json({message: "Nama desa tidak ditemukan"})
-  })
+  desaModels.find({ nama_desa: namaDesaYangInginDiganti })
+    .exec()
+    .then(resultPencarian => {
+      if (resultPencarian.length < 1) return res.status(401).json({ message: "Nama desa tidak ditemukan" })
+    })
 
-  kecamatanModels.find({nama_kecamatan: namaKecamatanBaru})
-  .exec()
-  .then(resultPencarian =>{
-    if(resultPencarian.length < 1) return res.status(401).json({message: "Nama kecamatan pengganti tidak ditemukan"})
-    idKecamatanBaru = resultPencarian[0]._id
-    desaModels.findOneAndUpdate(
-      {nama_desa: namaDesaYangInginDiganti},
-      {$set: {
-        nama_desa: namaDesaBaru,
-        nama_kecamatan: namaKecamatanBaru,
-        id_kecamatan: idKecamatanBaru,
-        suspek: suspekBaru,
-        discharded: dischardedBaru,
-        meninggal: meninggalBaru,
-        konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
-        konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
-        konfirmasi_sembuh:konfirmasiSembuhBaru,
-        konfirmasi_meninggal: konfirmasiMeninggalBaru  
-      }},
-      {upsert: false}
-    ).exec()
-    .then(results => {
-      if(results){
-        if (results.nama_desa == namaDesaBaru) {
-          return res.status(201).json({
-            message: "Data Desa " + results.nama_desa + " Telah diperbarui",
-            updatedProduct: {
-              nama_desa: namaDesaBaru,
-              nama_kecamatan: namaKecamatanBaru,
-              id_kecamatan: idKecamatanBaru,
-              suspek: suspekBaru,
-              discharded: dischardedBaru,
-              meninggal: meninggalBaru,
-              konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
-              konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
-              konfirmasi_sembuh:konfirmasiSembuhBaru,
-              konfirmasi_meninggal: konfirmasiMeninggalBaru 
+  kecamatanModels.find({ nama_kecamatan: namaKecamatanBaru })
+    .exec()
+    .then(resultPencarian => {
+      if (resultPencarian.length < 1) return res.status(401).json({ message: "Nama kecamatan pengganti tidak ditemukan" })
+      idKecamatanBaru = resultPencarian[0]._id
+      desaModels.findOneAndUpdate(
+        { nama_desa: namaDesaYangInginDiganti },
+        {
+          $set: {
+            nama_desa: namaDesaBaru,
+            nama_kecamatan: namaKecamatanBaru,
+            id_kecamatan: idKecamatanBaru,
+            suspek: suspekBaru,
+            discharded: dischardedBaru,
+            meninggal: meninggalBaru,
+            keterangan: keteranganBaru,
+            konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
+            konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
+            konfirmasi_sembuh: konfirmasiSembuhBaru,
+            konfirmasi_meninggal: konfirmasiMeninggalBaru,
+            keterangan_konfirmasi: keteranganKonfirmasiBaru
+          }
+        },
+        { upsert: false }
+      ).exec()
+        .then(results => {
+          if (results) {
+            if (results.nama_desa == namaDesaBaru) {
+              return res.status(201).json({
+                message: "Data Desa " + results.nama_desa + " Telah diperbarui",
+                updatedProduct: {
+                  nama_desa: namaDesaBaru,
+                  nama_kecamatan: namaKecamatanBaru,
+                  id_kecamatan: idKecamatanBaru,
+                  suspek: suspekBaru,
+                  discharded: dischardedBaru,
+                  meninggal: meninggalBaru,
+                  keterangan: keteranganBaru,
+                  konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
+                  konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
+                  konfirmasi_sembuh: konfirmasiSembuhBaru,
+                  konfirmasi_meninggal: konfirmasiMeninggalBaru,
+                  keterangan_konfirmasi: keteranganKonfirmasiBaru
+                }
+              });
+            } else {
+              return res.status(201).json({
+                message: "Data Desa " + namaDesaYangInginDiganti + " telah diupdate dan namanya diganti menjadi " + namaDesaBaru,
+                updatedProduct: {
+                  nama_desa: namaDesaBaru,
+                  nama_kecamatan: namaKecamatanBaru,
+                  id_kecamatan: idKecamatanBaru,
+                  suspek: suspekBaru,
+                  discharded: dischardedBaru,
+                  meninggal: meninggalBaru,
+                  konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
+                  konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
+                  konfirmasi_sembuh: konfirmasiSembuhBaru,
+                  konfirmasi_meninggal: konfirmasiMeninggalBaru
+                }
+              })
             }
-          });
-        } else {
-          return res.status(201).json({
-            message: "Data Desa " + namaDesaYangInginDiganti + " telah diupdate dan namanya diganti menjadi " + namaDesaBaru,
-            updatedProduct: {
-              nama_desa: namaDesaBaru,
-              nama_kecamatan: namaKecamatanBaru,
-              id_kecamatan: idKecamatanBaru,
-              suspek: suspekBaru,
-              discharded: dischardedBaru,
-              meninggal: meninggalBaru,
-              konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
-              konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
-              konfirmasi_sembuh:konfirmasiSembuhBaru,
-              konfirmasi_meninggal: konfirmasiMeninggalBaru 
-            }
-          })
-        }
-      }
+          }
+        })
+        .catch(err => {
+          return res.status(401).json({ message: "Gagal", error: err })
+        })
     })
-    .catch(err => {
-      return res.status(401).json({message: "Gagal", error: err})
-    })
-  })
 
 
 }
@@ -308,10 +388,12 @@ exports.getDesaInKecamatan = function (req, res) {
             suspek: result.suspek,
             discharded: result.discharded,
             meninggal: result.meninggal,
+            keterangan: result.keterangan,
             konfirmasi_symptomatik: result.konfirmasi_symptomatik,
             konfirmasi_asymptomatik: result.konfirmasi_asymptomatik,
             konfirmasi_sembuh: result.konfirmasi_sembuh,
-            konfirmasi_meninggal: result.konfirmasi_meninggal
+            konfirmasi_meninggal: result.konfirmasi_meninggal,
+            keterangan_konfirmasi: result.keterangan_konfirmasi
           };
         })
       };
@@ -319,58 +401,58 @@ exports.getDesaInKecamatan = function (req, res) {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({
+      res.status(500).send({
         error: err
       });
     });
 }
 
-exports.deleteKecamatan = function (req,res) {
-  desaModels.find({id_kecamatan: req.params.idKecamatan})
-  .exec()
-  .then(results => {
-    if(results.length > 0) return res.status(401).json({message: "Terdapat " + results.length + " Desa dalam kecamatan tersebut"})
+exports.deleteKecamatan = function (req, res) {
+  desaModels.find({ id_kecamatan: req.params.idKecamatan })
+    .exec()
+    .then(results => {
+      if (results.length > 0) return res.status(401).json({ message: "Terdapat " + results.length + " Desa dalam kecamatan tersebut" })
 
-    var namaKecamatan;
-    kecamatanModels.find({_id: req.params.idKecamatan})
+      var namaKecamatan;
+      kecamatanModels.find({ _id: req.params.idKecamatan })
+        .exec()
+        .then(result => {
+          if (result.length < 1) return res.status(401).json({ message: "Nama kecamatan tidak ditemukan!" })
+          namaKecamatan = result[0].nama_kecamatan;
+        })
+
+      kecamatanModels.deleteOne({ _id: req.params.idKecamatan })
+        .exec()
+        .then(result => {
+          return res.status(201).json({
+            message: "Kecamatan " + namaKecamatan + " berhasil dihapus!"
+          })
+        })
+        .catch(err => {
+          return res.status(500).send({
+            error: err
+          })
+        })
+    })
+}
+exports.deleteDesa = function (req, res) {
+  var namaDesa;
+  desaModels.find({ _id: req.params.idDesa })
+    .exec()
+    .then(results => {
+      if (results.length < 1) return res.status(401).json({ message: "nama desa tidak ditemukan" });
+
+      namaDesa = results[0].nama_desa;
+    })
+
+  desaModels.deleteOne({ _id: req.params.idDesa })
     .exec()
     .then(result => {
-      if(result.length < 1) return res.status(401).json({message: "Nama kecamatan tidak ditemukan!"})
-      namaKecamatan = result[0].nama_kecamatan;
-    })
-
-    kecamatanModels.deleteOne({_id: req.params.idKecamatan})
-    .exec()
-    .then(result =>{
-      return res.status(201).json({
-        message: "Kecamatan " + namaKecamatan + " berhasil dihapus!"
-      })
+      return res.status(201).json({ message: "Desa " + namaDesa + " berhasil dihapus" })
     })
     .catch(err => {
-      return res.status(500).json({
+      res.status(500).send({
         error: err
       })
     })
-  })
-}
-exports.deleteDesa = function (req,res) {
-  var namaDesa;
-  desaModels.find({_id: req.params.idDesa})
-  .exec()
-  .then(results => {
-    if(results.length < 1) return res.status(401).json({message: "nama desa tidak ditemukan"});
-
-    namaDesa = results[0].nama_desa;
-  })
-
-  desaModels.deleteOne({_id: req.params.idDesa})
-  .exec()
-  .then(result => {
-    return res.status(201).json({message: "Desa " + namaDesa + " berhasil dihapus"})
-  })
-  .catch(err => {
-    res.status(500).json({
-      error: err
-    })
-  })
 }

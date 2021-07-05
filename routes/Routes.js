@@ -10,7 +10,9 @@ const testing = require("../controller/testController");
 
 //COVID ROUTES
 router.post("/covid/tambah-kecamatan", covid.tambahKecamatan); 
+router.post("/covid/tambah-kecamatan-csv", covid.tambahKecamatanCSV); 
 router.post("/covid/tambah-desa", covid.tambahDesa); 
+router.post("/covid/tambah-desa-csv", covid.tambahDesaCSV); 
 router.get("/covid/get-all-kecamatan", covid.getAllKecamatan); 
 router.get("/covid/get-one-kecamatan/:namaKecamatan", covid.getOneKecamatan); 
 router.get("/covid/get-desa-in-kecamatan/:idKecamatan", covid.getDesaInKecamatan); 

@@ -1,4 +1,5 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const mongooseUniqueValidator = require("mongoose-unique-validator");
 const Schema = mongoose.Schema;
 
 const DesaModels = Schema({
@@ -16,10 +17,6 @@ const DesaModels = Schema({
         keterangan_konfirmasi: { type: String }
 })
 
-//Contoh
-// let TodoScrhema = Schema({
-//     name : {type:String},
-//     done : {type:Boolean}
-// })
+DesaModels.plugin(mongooseUniqueValidator)
 
 module.exports = mongoose.model("dataDesa", DesaModels)

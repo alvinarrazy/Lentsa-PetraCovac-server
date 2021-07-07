@@ -1,7 +1,45 @@
 //Models 
 const { json } = require("body-parser");
 const desaModels = require("../model/desaModels");
-const kecamatanModels = require("../model/kecamantanModels");
+const kecamatanModels = require("../model/kecamatanModels");
+
+
+//Async function untuk tambahDesaCSV gk tau kenapa harus terpisah jdi biarin gini aja
+async function mapAddDesa(jsonFile) {
+  try {
+    var desaTertambah = []
+    var errors = []
+    var results = [];
+    var desaDitolak = [];
+    const value = await Promise.all(jsonFile.map(desa => {
+      var checking = checkIfKecamatanExist(desa)
+      return checking.then((result) => {
+        if (result.length >= 1) {
+          desa.id_kecamatan = result[0]._id
+          return desaModels.create(desa).then(result => {
+            desaTertambah.push(result)
+            results.desaDiterima = desaTertambah
+            return results;
+          })
+          .catch(error=> {
+            errors.push(error)
+            results.error = errors
+            return results
+          })
+        }
+        else {
+           desaDitolak.push(desa)
+           results.desaTidakAdaKecamatan = desaDitolak
+           return results
+        }
+      })
+    }))
+    return value[0];
+  }
+  catch(error) {
+    return error
+  }
+}
 
 async function checkIfKecamatanExist(desa) {
   try {
@@ -75,7 +113,7 @@ exports.getAllKecamatan = function (req, res) {
           };
         })
       };
-      res.status(200).json(response);
+      res.status(200).send(response);
     })
     .catch(err => {
       console.log(err);
@@ -260,20 +298,20 @@ exports.tambahDesa = function (req, res) {
 
 exports.tambahDesaCSV = function (req, res) {
   const jsonFile = keysToLowerCase(req.body);
-  jsonFile.map(desa => {
-    var checking = checkIfKecamatanExist(desa)
-    checking.then(result => {
-      if (result.length >= 1) {
-        desa.id_kecamatan = result[0]._id
-        desaModels.create(desa)
-         .catch(er => {
-           return res.status(500).send({error: er})
-        })
-      } else {
-        console.log("Desa tidak diterima", desa)
-      }
-    })
+  
+  let value = mapAddDesa(jsonFile) //calling async function
+  value.then(result => {
+    if(result){
+      
+      res.status(201).send({
+        message: "desa baru telah ditambahkan",
+        createdProduct: result.desaDiterima,
+        rejectedProduct: result.desaTidakAdaKecamatan,
+        errors: result.error
+      })
+    }
   })
+  //(promises).then(function (result) { console.log("Disini") })
 }
 
 

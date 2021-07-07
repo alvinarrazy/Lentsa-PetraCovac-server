@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+var uniqueValidator = require('mongoose-unique-validator')
 const Schema = mongoose.Schema;
 
 const KecamatanModels = Schema({
@@ -8,10 +9,6 @@ const KecamatanModels = Schema({
         }
 })
 
-//Contoh
-// let TodoScrhema = Schema({
-//     name : {type:String},
-//     done : {type:Boolean}
-// })
+KecamatanModels.plugin(uniqueValidator)
 
 module.exports = mongoose.model("dataKecamatan", KecamatanModels)

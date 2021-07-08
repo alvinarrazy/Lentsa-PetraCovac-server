@@ -19,6 +19,7 @@ router.get("/covid/get-one-kecamatan/:namaKecamatan", covid.getOneKecamatan);
 router.get("/covid/get-desa-in-kecamatan/:idKecamatan", covid.getDesaInKecamatan); 
 router.put("/covid/edit-kecamatan/:namaKecamatan", covid.updateDataKecamatan)
 router.put("/covid/edit-desa/:namaDesa", covid.updateDataDesa);
+router.put("/covid/update-from-url", covid.updateDataFromURL);
 router.delete("/covid/delete-kecamatan/:idKecamatan", covid.deleteKecamatan);
 router.delete("/covid/delete-desa/:idDesa", covid.deleteDesa);
 

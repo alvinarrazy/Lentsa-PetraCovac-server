@@ -3,85 +3,6 @@ const { json } = require("body-parser");
 const desaModels = require("../model/desaModels");
 const kecamatanModels = require("../model/kecamatanModels");
 
-function summarizeData(jumlahDesa) {
-  //data.semua_desa[0].suspek
-
-  return sum
-}
-
-
-//Async function untuk tambahDesaCSV gk tau kenapa harus terpisah jdi biarin gini aja
-async function mapAddDesa(jsonFile) {
-  try {
-    var desaTertambah = []
-    var errors = []
-    var results = [];
-    var desaDitolak = [];
-    const value = await Promise.all(jsonFile.map(desa => {
-      var checking = checkIfKecamatanExist(desa)
-      return checking.then((result) => {
-        if (result.length >= 1) {
-          desa.id_kecamatan = result[0]._id
-          return desaModels.create(desa).then(result => {
-            desaTertambah.push(result)
-            results.desaDiterima = desaTertambah
-            return results;
-          })
-            .catch(error => {
-              errors.push(error)
-              results.error = errors
-              return results
-            })
-        }
-        else {
-          desaDitolak.push(desa)
-          results.desaTidakAdaKecamatan = desaDitolak
-          return results
-        }
-      })
-    }))
-    return value[0];
-  }
-  catch (error) {
-    return error
-  }
-}
-
-async function checkIfKecamatanExist(desa) {
-  try {
-    result = await kecamatanModels.find({ nama_kecamatan: desa.nama_kecamatan }).exec()
-    if (result.length >= 1) return result
-    else return false
-  }
-  catch {
-    console.log("Err")
-  }
-}
-
-
-//lower Case JSON
-function keysToLowerCase(obj) {
-  if (obj instanceof Array) {
-    for (var i in obj) {
-      obj[i] = keysToLowerCase(obj[i]);
-    }
-  }
-  if (!typeof (obj) === "object" || typeof (obj) === "string" || typeof (obj) === "number" || typeof (obj) === "boolean") {
-    return obj;
-  }
-  var keys = Object.keys(obj);
-  var n = keys.length;
-  var lowKey;
-  while (n--) {
-    var key = keys[n];
-    if (key === (lowKey = key.toLowerCase()))
-      continue;
-    obj[lowKey] = keysToLowerCase(obj[key]);
-    delete obj[key];
-  }
-  return (obj);
-}
-
 //Ambil data 1 kecamatan berdasarkan nama
 exports.getOneKecamatan = function (req, res) {
   kecamatanModels.find({ nama_kecamatan: req.params.namaKecamatan })
@@ -162,6 +83,7 @@ exports.tambahKecamatan = function (req, res) {
     })
 }
 
+
 //tambah data dengan CSV
 exports.tambahKecamatanCSV = function (req, res) {
   var jsonFile = keysToLowerCase(req.body);
@@ -177,6 +99,8 @@ exports.tambahKecamatanCSV = function (req, res) {
       res.status(500).send({ error: er })
     })
 }
+
+
 //Update data kecamatan
 exports.updateDataKecamatan = function (req, res) {
   const namaKecamatanYangInginDiganti = req.params.namaKecamatan
@@ -233,6 +157,7 @@ exports.updateDataKecamatan = function (req, res) {
       });
     })
 }
+
 
 //Tambah Desa Baru
 exports.tambahDesa = function (req, res) {
@@ -302,6 +227,75 @@ exports.tambahDesa = function (req, res) {
 
 }
 
+
+//lower Case JSON
+function keysToLowerCase(obj) {
+  if (obj instanceof Array) {
+    for (var i in obj) {
+      obj[i] = keysToLowerCase(obj[i]);
+    }
+  }
+  if (!typeof (obj) === "object" || typeof (obj) === "string" || typeof (obj) === "number" || typeof (obj) === "boolean") {
+    return obj;
+  }
+  var keys = Object.keys(obj);
+  var n = keys.length;
+  var lowKey;
+  while (n--) {
+    var key = keys[n];
+    if (key === (lowKey = key.toLowerCase()))
+      continue;
+    obj[lowKey] = keysToLowerCase(obj[key]);
+    delete obj[key];
+  }
+  return (obj);
+}
+async function checkIfKecamatanExist(desa) {
+  try {
+    result = await kecamatanModels.find({ nama_kecamatan: desa.nama_kecamatan }).exec()
+    if (result.length >= 1) return result
+    else return false
+  }
+  catch {
+    console.log("Err")
+  }
+}
+//Async function untuk tambahDesaCSV gk tau kenapa harus terpisah jdi biarin gini aja
+async function mapAddDesa(jsonFile) {
+  try {
+    var desaTertambah = []
+    var errors = []
+    var results = [];
+    var desaDitolak = [];
+    const value = await Promise.all(jsonFile.map(desa => {
+      var checking = checkIfKecamatanExist(desa)
+      return checking.then((result) => {
+        if (result.length >= 1) {
+          desa.id_kecamatan = result[0]._id
+          return desaModels.create(desa).then(result => {
+            desaTertambah.push(result)
+            results.desaDiterima = desaTertambah
+            return results;
+          })
+            .catch(error => {
+              errors.push(error)
+              results.error = errors
+              return results
+            })
+        }
+        else {
+          desaDitolak.push(desa)
+          results.desaTidakAdaKecamatan = desaDitolak
+          return results
+        }
+      })
+    }))
+    return value[0];
+  }
+  catch (error) {
+    return error
+  }
+}
 exports.tambahDesaCSV = function (req, res) {
   const jsonFile = keysToLowerCase(req.body);
 
@@ -451,6 +445,7 @@ exports.getDesaInKecamatan = function (req, res) {
     });
 }
 
+
 exports.deleteKecamatan = function (req, res) {
   desaModels.find({ id_kecamatan: req.params.idKecamatan })
     .exec()
@@ -479,6 +474,8 @@ exports.deleteKecamatan = function (req, res) {
         })
     })
 }
+
+
 exports.deleteDesa = function (req, res) {
   var namaDesa;
   desaModels.find({ _id: req.params.idDesa })
@@ -500,6 +497,7 @@ exports.deleteDesa = function (req, res) {
       })
     })
 }
+
 
 exports.getSumDataKecamatan = function (req, res) {
   desaModels.find({ id_kecamatan: req.params.idKecamatan })

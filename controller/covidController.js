@@ -3,6 +3,12 @@ const { json } = require("body-parser");
 const desaModels = require("../model/desaModels");
 const kecamatanModels = require("../model/kecamatanModels");
 
+function summarizeData(jumlahDesa) {
+  //data.semua_desa[0].suspek
+
+  return sum
+}
+
 
 //Async function untuk tambahDesaCSV gk tau kenapa harus terpisah jdi biarin gini aja
 async function mapAddDesa(jsonFile) {
@@ -21,22 +27,22 @@ async function mapAddDesa(jsonFile) {
             results.desaDiterima = desaTertambah
             return results;
           })
-          .catch(error=> {
-            errors.push(error)
-            results.error = errors
-            return results
-          })
+            .catch(error => {
+              errors.push(error)
+              results.error = errors
+              return results
+            })
         }
         else {
-           desaDitolak.push(desa)
-           results.desaTidakAdaKecamatan = desaDitolak
-           return results
+          desaDitolak.push(desa)
+          results.desaTidakAdaKecamatan = desaDitolak
+          return results
         }
       })
     }))
     return value[0];
   }
-  catch(error) {
+  catch (error) {
     return error
   }
 }
@@ -298,11 +304,11 @@ exports.tambahDesa = function (req, res) {
 
 exports.tambahDesaCSV = function (req, res) {
   const jsonFile = keysToLowerCase(req.body);
-  
+
   let value = mapAddDesa(jsonFile) //calling async function
   value.then(result => {
-    if(result){
-      
+    if (result) {
+
       res.status(201).send({
         message: "desa baru telah ditambahkan",
         createdProduct: result.desaDiterima,
@@ -491,6 +497,76 @@ exports.deleteDesa = function (req, res) {
     .catch(err => {
       res.status(500).send({
         error: err
+      })
+    })
+}
+
+exports.getSumDataKecamatan = function (req, res) {
+  desaModels.find({ id_kecamatan: req.params.idKecamatan })
+    .exec()
+    .then(results => {
+      const data = {
+        jumlah_desa_di_kecamatan: results.length,
+        semua_desa: results.map(result => {
+          return {
+            _id: result._id,
+            nama_desa: result.nama_desa,
+            id_kecamatan: result.id_kecamatan,
+            nama_kecamatan: result.nama_kecamatan,
+            suspek: result.suspek,
+            discharded: result.discharded,
+            meninggal: result.meninggal,
+            keterangan: result.keterangan,
+            konfirmasi_symptomatik: result.konfirmasi_symptomatik,
+            konfirmasi_asymptomatik: result.konfirmasi_asymptomatik,
+            konfirmasi_sembuh: result.konfirmasi_sembuh,
+            konfirmasi_meninggal: result.konfirmasi_meninggal,
+            keterangan_konfirmasi: result.keterangan_konfirmasi
+          };
+        })
+      };
+      var suspek = 0
+      var discharded = 0
+      var meninggal = 0
+      var konfirmasiSymptomatik = 0
+      var konfirmasiAsymptomatik = 0
+      var konfirmasiSembuh = 0
+      var konfirmasiMeninggal = 0
+      let jumlahDesa = data.jumlah_desa_di_kecamatan
+      console.log(jumlahDesa)
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        suspek += data.semua_desa[i].suspek
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        discharded += data.semua_desa[i].discharded
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        meninggal += data.semua_desa[i].meninggal
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        konfirmasiAsymptomatik += data.semua_desa[i].konfirmasi_asymptomatik
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        konfirmasiSymptomatik += data.semua_desa[i].konfirmasi_symptomatik
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        konfirmasiSembuh += data.semua_desa[i].konfirmasi_sembuh
+      }
+      for (var i = 0; i < jumlahDesa;i++ ) {
+        konfirmasiMeninggal += data.semua_desa[i].konfirmasi_meninggal
+      }
+      return res.status(201).send({
+        message: "Data Kecamatan",
+        nama_kecamatan: data.semua_kecamatan[0].nama_kecamatan,
+        data: {
+          suspek: suspek,
+          discharded: discharded,
+          meninggal: meninggal,
+          konfirmasi_asymptomatik: konfirmasiAsymptomatik,
+          konfirmasi_symptomatik: konfirmasiSymptomatik,
+          konfirmasi_sembuh: konfirmasiSembuh,
+          konfirmasi_meninggal: konfirmasiMeninggal
+        }
       })
     })
 }

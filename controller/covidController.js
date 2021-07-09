@@ -13,7 +13,7 @@ exports.getOneKecamatan = function (req, res) {
           return {
             _id: result._id,
             nama_kecamatan: result.nama_kecamatan
-          }; 
+          };
         })
       };
       res.status(201).json(response);
@@ -360,7 +360,7 @@ exports.updateDataDesa = function (req, res) {
             keterangan_konfirmasi: keteranganKonfirmasiBaru
           }
         },
-        { upsert: false }
+        { upsert: false, omitUndefined:true }
       ).exec()
         .then(results => {
           if (results) {
@@ -532,25 +532,25 @@ exports.getSumDataKecamatan = function (req, res) {
       var konfirmasiMeninggal = 0
       let jumlahDesa = data.jumlah_desa_di_kecamatan
       console.log(jumlahDesa)
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         suspek += data.semua_desa[i].suspek
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         discharded += data.semua_desa[i].discharded
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         meninggal += data.semua_desa[i].meninggal
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         konfirmasiAsymptomatik += data.semua_desa[i].konfirmasi_asymptomatik
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         konfirmasiSymptomatik += data.semua_desa[i].konfirmasi_symptomatik
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         konfirmasiSembuh += data.semua_desa[i].konfirmasi_sembuh
       }
-      for (var i = 0; i < jumlahDesa;i++ ) {
+      for (var i = 0; i < jumlahDesa; i++) {
         konfirmasiMeninggal += data.semua_desa[i].konfirmasi_meninggal
       }
       return res.status(201).json({
@@ -566,5 +566,67 @@ exports.getSumDataKecamatan = function (req, res) {
           konfirmasi_meninggal: konfirmasiMeninggal
         }
       })
+    })
+}
+
+exports.updateByURL = function (req, res) {
+  const namaDesa = req.body.nama_desa;
+  const suspekBaru = req.body.suspek;
+  const dischardedBaru = req.body.discharded;
+  const meninggalBaru = req.body.meninggal;
+  const keteranganBaru = req.body.keterangan;
+  const konfirmasiSymptomatikBaru = req.body.konfirmasi_asymptomatik;
+  const konfirmasiAsymptomatikBaru = req.body.konfirmasi_symptomatik;
+  const konfirmasiSembuhBaru = req.body.konfirmasi_sembuh;
+  const konfirmasiMeninggalBaru = req.body.konfirmasi_meninggal;
+  const keteranganKonfirmasiBaru = req.body.keterangan_konfirmasi
+
+  //cek nama desa
+  desaModels.find({ nama_desa: namaDesa })
+    .exec()
+    .then(resultPencarian => {
+      if (resultPencarian.length < 1) return res.status(401).json({ message: "Nama desa tidak ditemukan" })
+      desaModels.findOneAndUpdate(
+        { nama_desa: namaDesa },
+        {
+          $set: {
+            nama_desa: namaDesa,
+            suspek: suspekBaru,
+            discharded: dischardedBaru,
+            meninggal: meninggalBaru,
+            keterangan: keteranganBaru,
+            konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
+            konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
+            konfirmasi_sembuh: konfirmasiSembuhBaru,
+            konfirmasi_meninggal: konfirmasiMeninggalBaru,
+            keterangan_konfirmasi: keteranganKonfirmasiBaru
+          }
+        },
+        { upsert: false, omitUndefined:true }
+      ).exec()
+        .then(results => {
+          if (results) {
+            if (results.nama_desa == namaDesa) {
+              return res.status(201).json({
+                message: "Data Desa " + results.nama_desa + " Telah diperbarui",
+                updatedProduct: {
+                  nama_desa: namaDesa,
+                  suspek: suspekBaru,
+                  discharded: dischardedBaru,
+                  meninggal: meninggalBaru,
+                  keterangan: keteranganBaru,
+                  konfirmasi_asymptomatik: konfirmasiAsymptomatikBaru,
+                  konfirmasi_symptomatik: konfirmasiSymptomatikBaru,
+                  konfirmasi_sembuh: konfirmasiSembuhBaru,
+                  konfirmasi_meninggal: konfirmasiMeninggalBaru,
+                  keterangan_konfirmasi: keteranganKonfirmasiBaru
+                }
+              });
+            }
+          }
+        })
+        .catch(err => {
+          return res.status(401).json({ message: "Gagal", error: err })
+        })
     })
 }

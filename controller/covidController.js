@@ -13,10 +13,10 @@ exports.getOneKecamatan = function (req, res) {
           return {
             _id: result._id,
             nama_kecamatan: result.nama_kecamatan
-          };
+          }; 
         })
       };
-      res.status(200).json(response);
+      res.status(201).json(response);
     })
     .catch(err => {
       console.log(err);
@@ -40,7 +40,7 @@ exports.getAllKecamatan = function (req, res) {
           };
         })
       };
-      res.status(200).send(response);
+      res.status(201).json(response);
     })
     .catch(err => {
       console.log(err);
@@ -93,7 +93,7 @@ exports.tambahKecamatanCSV = function (req, res) {
   })
   kecamatanModels.insertMany(paketDataBaru)
     .then(result => {
-      res.status(201).send(result)
+      res.status(201).json(result)
     })
     .catch(er => {
       res.status(500).send({ error: er })
@@ -303,7 +303,7 @@ exports.tambahDesaCSV = function (req, res) {
   value.then(result => {
     if (result) {
 
-      res.status(201).send({
+      res.status(201).json({
         message: "desa baru telah ditambahkan",
         createdProduct: result.desaDiterima,
         rejectedProduct: result.desaTidakAdaKecamatan,
@@ -435,7 +435,7 @@ exports.getDesaInKecamatan = function (req, res) {
           };
         })
       };
-      res.status(200).json(response);
+      res.status(201).json(response);
     })
     .catch(err => {
       console.log(err);
@@ -553,7 +553,7 @@ exports.getSumDataKecamatan = function (req, res) {
       for (var i = 0; i < jumlahDesa;i++ ) {
         konfirmasiMeninggal += data.semua_desa[i].konfirmasi_meninggal
       }
-      return res.status(201).send({
+      return res.status(201).json({
         message: "Data Kecamatan",
         nama_kecamatan: data.semua_kecamatan[0].nama_kecamatan,
         data: {

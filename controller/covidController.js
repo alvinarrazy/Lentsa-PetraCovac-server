@@ -554,8 +554,6 @@ exports.getSumDataKecamatan = function (req, res) {
         konfirmasiMeninggal += data.semua_desa[i].konfirmasi_meninggal
       }
       return res.status(201).json({
-        message: "Data Kecamatan",
-        nama_kecamatan: data.semua_kecamatan[0].nama_kecamatan,
         data: {
           suspek: suspek,
           discharded: discharded,

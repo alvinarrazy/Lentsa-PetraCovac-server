@@ -360,7 +360,7 @@ exports.updateDataDesa = function (req, res) {
             keterangan_konfirmasi: keteranganKonfirmasiBaru
           }
         },
-        { upsert: false, omitUndefined:true }
+        { upsert: false, omitUndefined: true }
       ).exec()
         .then(results => {
           if (results) {
@@ -554,15 +554,14 @@ exports.getSumDataKecamatan = function (req, res) {
         konfirmasiMeninggal += data.semua_desa[i].konfirmasi_meninggal
       }
       return res.status(201).json({
-        data: {
-          suspek: suspek,
-          discharded: discharded,
-          meninggal: meninggal,
-          konfirmasi_asymptomatik: konfirmasiAsymptomatik,
-          konfirmasi_symptomatik: konfirmasiSymptomatik,
-          konfirmasi_sembuh: konfirmasiSembuh,
-          konfirmasi_meninggal: konfirmasiMeninggal
-        }
+        nama_kecamatan:results[0].nama_kecamatan,
+        suspek: suspek,
+        discharded: discharded,
+        meninggal: meninggal,
+        konfirmasi_asymptomatik: konfirmasiAsymptomatik,
+        konfirmasi_symptomatik: konfirmasiSymptomatik,
+        konfirmasi_sembuh: konfirmasiSembuh,
+        konfirmasi_meninggal: konfirmasiMeninggal
       })
     })
 }
@@ -600,7 +599,7 @@ exports.updateByURL = function (req, res) {
             keterangan_konfirmasi: keteranganKonfirmasiBaru
           }
         },
-        { upsert: false, omitUndefined:true }
+        { upsert: false, omitUndefined: true }
       ).exec()
         .then(results => {
           if (results) {

@@ -496,6 +496,8 @@ exports.deleteDesa = function (req, res) {
 }
 
 
+
+
 exports.getSumDataKecamatan = function (req, res) {
   desaModels.find({ id_kecamatan: req.params.idKecamatan })
     .exec()
@@ -528,7 +530,6 @@ exports.getSumDataKecamatan = function (req, res) {
       var konfirmasiSembuh = 0
       var konfirmasiMeninggal = 0
       let jumlahDesa = data.jumlah_desa_di_kecamatan
-      console.log(jumlahDesa)
       for (var i = 0; i < jumlahDesa; i++) {
         suspek += data.semua_desa[i].suspek
       }
@@ -560,6 +561,9 @@ exports.getSumDataKecamatan = function (req, res) {
         konfirmasi_sembuh: konfirmasiSembuh,
         konfirmasi_meninggal: konfirmasiMeninggal
       })
+    })
+    .catch(error => {
+      res.status(500).send({error})
     })
 }
 

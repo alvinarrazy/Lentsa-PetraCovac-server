@@ -8,7 +8,6 @@ exports.getOneKecamatan = function (req, res) {
   kecamatanModels.find({ nama_kecamatan: req.params.namaKecamatan })
     .then(results => {
       const response = {
-        jumlah_kecamatan: results.length,
         semua_kecamatan: results.map(result => {
           return {
             _id: result._id,
@@ -32,7 +31,6 @@ exports.getAllKecamatan = function (req, res) {
   kecamatanModels.find()
     .then(results => {
       const response = {
-        jumlah_kecamatan: results.length,
         semua_kecamatan: results.map(result => {
           return {
             _id: result._id,
@@ -416,7 +414,6 @@ exports.getDesaInKecamatan = function (req, res) {
     .exec()
     .then(results => {
       const response = {
-        jumlah_desa_di_kecamatan: results.length,
         semua_desa: results.map(result => {
           return {
             _id: result._id,

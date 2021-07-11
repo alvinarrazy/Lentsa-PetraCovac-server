@@ -553,6 +553,7 @@ exports.getSumDataKecamatan = function (req, res) {
       }
       return res.status(201).json({
         nama_kecamatan: results[0].nama_kecamatan,
+        id_kecamatan: results[0].id_kecamatan,
         suspek: suspek,
         discharded: discharded,
         meninggal: meninggal,

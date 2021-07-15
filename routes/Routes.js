@@ -9,19 +9,19 @@ const account = require("../controller/accountController");
 const testing = require("../controller/testController");
 
 //COVID ROUTES
-router.post("/covid/tambah-kecamatan", covid.tambahKecamatan); 
-router.post("/covid/tambah-kecamatan-csv", covid.tambahKecamatanCSV); 
-router.post("/covid/tambah-desa", covid.tambahDesa); 
-router.post("/covid/tambah-desa-csv", covid.tambahDesaCSV); 
+router.post("/covid/tambah-kecamatan",checkAuthAdmin, covid.tambahKecamatan); 
+router.post("/covid/tambah-kecamatan-csv",checkAuthAdmin, covid.tambahKecamatanCSV); 
+router.post("/covid/tambah-desa",checkAuthAdmin, covid.tambahDesa); 
+router.post("/covid/tambah-desa-csv",checkAuthAdmin, covid.tambahDesaCSV); 
 router.get("/covid/get-all-kecamatan", covid.getAllKecamatan); 
 router.get("/covid/get-sum-data-kecamatan/:idKecamatan", covid.getSumDataKecamatan); 
 router.get("/covid/get-one-kecamatan/:namaKecamatan", covid.getOneKecamatan); 
 router.get("/covid/get-desa-in-kecamatan/:idKecamatan", covid.getDesaInKecamatan); 
-router.put("/covid/edit-kecamatan/:namaKecamatan", covid.updateDataKecamatan)
-router.put("/covid/edit-desa/:namaDesa", covid.updateDataDesa);
-router.put("/covid/edit-desa-by-url", covid.updateByURL);
-router.delete("/covid/delete-kecamatan/:idKecamatan", covid.deleteKecamatan);
-router.delete("/covid/delete-desa/:idDesa", covid.deleteDesa);
+router.put("/covid/edit-kecamatan/:namaKecamatan",checkAuthAdmin, covid.updateDataKecamatan)
+router.put("/covid/edit-desa/:namaDesa",checkAuthAdmin, covid.updateDataDesa);
+router.put("/covid/edit-desa-by-url",checkAuthAdmin, covid.updateByURL);
+router.delete("/covid/delete-kecamatan/:idKecamatan",checkAuthAdmin, covid.deleteKecamatan);
+router.delete("/covid/delete-desa/:idDesa",checkAuthAdmin, covid.deleteDesa);
 
 //ACCOUNT ROUTE
 router.post("/admin/register", account.registerAdmin);

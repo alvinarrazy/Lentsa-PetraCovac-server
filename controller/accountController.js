@@ -81,7 +81,8 @@ exports.loginAdmin = function (req, res) {
           return res.status(201).json({
             email: result[0].email,
             username: result[0].username,
-            token: token
+            token: token,
+            role: result[0].role
           });
         }else{
           res.status(401).json({

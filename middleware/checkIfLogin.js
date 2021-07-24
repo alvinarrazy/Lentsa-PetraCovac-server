@@ -1,14 +1,13 @@
 const jwt = require('jsonwebtoken');
-const {userSecret} = require('../config');
+const {Secret} = require('../config');
 module.exports = async (req, res, next) => {
-
 
     try {
         //console.log("authorization!!!= "+ req.headers.authorization);
         const token = req.headers.authorization;
-        const decoded = jwt.verify(token, userSecret);
-        req.adminLoginData = decoded;
-        console.log(req.adminLoginData)
+        const decoded = jwt.verify(token, Secret);
+        req.loginData = decoded;
+        console.log(req.loginData)
         next();
     } catch (error) {
         console.log(req.headers.authorization);

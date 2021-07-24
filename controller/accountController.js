@@ -1,11 +1,10 @@
 const userModels = require("../model/userModels");
-const adminModels = require("../model/adminModels");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const {adminSecret, userSecret} = require ('../config');
+const {Secret} = require ('../config');
 
-exports.registerAdmin = function (req, res) {
-  adminModels.find({ username: req.body.username })//cancel jika ada username yang sama
+exports.register = function (req, res) {
+  userModels.find({ username: req.body.username })//cancel jika ada username yang sama
     .exec()
     .then(result => {
       if (result.length >= 1) {
@@ -22,17 +21,17 @@ exports.registerAdmin = function (req, res) {
             // if(!req.file){
             //   return res.send('belum ada')
             // }
-            let newAdmin = new adminModels({
+            let newUser = new userModels({
               username: req.body.username,
               email: req.body.email,
               password: hash,
-              role: "admin"
+              role: "user"
             });
-            newAdmin.save()
+            newUser.save()
               .then(result => {
                 res.status(201).json({
-                  message: result.username + " berhasil ditambahkan sebagai admin baru",
-                  createdAdmin: {
+                  message: result.username + " berhasil ditambahkan",
+                  createdUser: {
                     username: result.username,
                     email: result.email,
                     hashedPassword: result.password,
@@ -51,13 +50,13 @@ exports.registerAdmin = function (req, res) {
     })
 }
 
-exports.loginAdmin = function (req, res) {
-  adminModels.find({ username: req.body.username })
+exports.login = function (req, res) {
+  userModels.find({ username: req.body.username })
     .exec()
     .then(result => {
       if (result.length < 1) {
         return res.status(401).json({
-          message: "Username Admin tidak ditemukan"
+          message: "Username tidak ditemukan"
         });
       }
       bcrypt.compare(req.body.password, result[0].password, (err) => {
@@ -73,7 +72,7 @@ exports.loginAdmin = function (req, res) {
               username: result[0].username,
               _id: result[0]._id
             },
-            adminSecret,
+            Secret,
             {
               expiresIn: "1h"
             }

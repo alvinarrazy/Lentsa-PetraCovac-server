@@ -6,10 +6,10 @@ exports.testLive = function (req, res) {
     });
 }
 
-exports.testIfAdminLogin = function (req, res) {
-    if (!req.adminLoginData) {
+exports.testIfLogin = function (req, res) {
+    if (!req.loginData) {
         return res.json({ message: "Unauthenticated" });
     }else{
-        return res.json({adminLoginDataId: req.adminLoginData._id})
+        return res.json({loginDataId: req.loginData._id})
     }
 }

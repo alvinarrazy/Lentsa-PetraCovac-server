@@ -1,62 +1,57 @@
 const userModels = require("../model/userModels");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const {Secret} = require ('../config');
+const { Secret } = require('../config');
 
-exports.register = function (req, res) {
-  userModels.find({ username: req.body.username })//cancel jika ada username yang sama
-    .exec()
-    .then(result => {
-      if (result.length >= 1) {
-        return res.status(409).json({
-          message: "Username exists"
-        });
-      } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          if (err) {
-            return res.status(500).json({
-              error: err
-            });
-          } else {
-            // if(!req.file){
-            //   return res.send('belum ada')
-            // }
-            let newUser = new userModels({
-              username: req.body.username,
-              email: req.body.email,
-              password: hash,
-              role: "user"
-            });
-            newUser.save()
-              .then(result => {
-                res.status(201).json({
-                  message: result.username + " berhasil ditambahkan",
-                  createdUser: {
-                    username: result.username,
-                    email: result.email,
-                    hashedPassword: result.password,
-                    role: result.role
-                  }
-                })
-              })
-              .catch(er => {
-                res.status(500).json({
-                  error: er
-                })
-              })
-          }
+exports.register = async function (req, res) {
+  try {
+    let findNik = await userModels.find({ nomorIndukKependudukan: req.body.nomorIndukKependudukan })
+    let findEmail = await userModels.find({ email: req.body.email })
+    if (findNik.length >= 1) return res.status(409).send({ message: "NIK telah terdaftar" })
+    if (findEmail.length >= 1) return res.status(409).send({ message: "Email telah terdaftar" })
+    try {
+      let hash = await bcrypt.hash(req.body.password, 12)
+      let newUser = new userModels({
+        nomorIndukKependudukan: req.body.nomorIndukKependudukan,
+        namaPanjang: req.body.namaPanjang,
+        email: req.body.email,
+        noTelp: req.body.noTelp,
+        jenisKelamin: req.body.jenisKelamin,
+        kotaLahir: req.body.kotaLahir,
+        tanggalLahir: req.body.tanggalLahir,
+        password: hash,
+        role: "user"
+      });
+      let result = await newUser.save()
+      if (result) {
+        return res.status(201).send({
+          nomorIndukKependudukan: result.nomorIndukKependudukan,
+          namaPanjang: result.namaPanjang,
+          email: result.email,
+          noTelp: result.noTelp,
+          jenisKelamin: result.jenisKelamin,
+          kotaLahir: result.kotaLahir,
+          tanggalLahir: result.tanggalLahir,
+          role: result.role
         })
       }
-    })
+    } catch (error) {
+      console.log(error.message)
+      return res.status(500).send({ error: error.message })
+    }
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).send({ error: error.message })
+  }
 }
 
 exports.login = function (req, res) {
-  userModels.find({ username: req.body.username })
+  userModels.find({ email: req.body.email })
     .exec()
     .then(result => {
       if (result.length < 1) {
         return res.status(401).json({
-          message: "Username tidak ditemukan"
+          message: "Email tidak ditemukan"
         });
       }
       bcrypt.compare(req.body.password, result[0].password, (err) => {
@@ -68,24 +63,34 @@ exports.login = function (req, res) {
         if (result) {
           const token = jwt.sign(
             {
+              nomorIndukKependudukan: result[0].nomorIndukKependudukan,
+              namaPanjang: result[0].namaPanjang,
               email: result[0].email,
-              username: result[0].username,
+              noTelp: result[0].noTelp,
+              jenisKelamin: result[0].jenisKelamin,
+              kotaLahir: result[0].kotaLahir,
+              tanggalLahir: result[0].tanggalLahir,
+              role: result[0].role,
               _id: result[0]._id
             },
             Secret,
             {
-              expiresIn: "1h"
+              expiresIn: "6h"
             }
           );
           return res.status(201).json({
+            nomorIndukKependudukan: result[0].nomorIndukKependudukan,
+            namaPanjang: result[0].namaPanjang,
             email: result[0].email,
-            username: result[0].username,
-            token: token,
+            noTelp: result[0].noTelp,
+            jenisKelamin: result[0].jenisKelamin,
+            kotaLahir: result[0].kotaLahir,
+            tanggalLahir: result[0].tanggalLahir,
             role: result[0].role
           });
-        }else{
+        } else {
           res.status(401).json({
-            message: "Auth failed"
+            message: "Authentication failed"
           });
         }
       });
@@ -96,41 +101,26 @@ exports.login = function (req, res) {
         error: err
       });
     });
-
-
-  //////////////////////////////////////////////////yang lama//////////////////////////////
-  // const UserModels = new UserModels;
-  // //Harus manggil langsung imported file nya, gk tau kenapa (gk bisa kalo manggil yang UserModels)
-  // UserModels.find({username: req.body.username, password: req.body.password},function(err,res){
-  //     if(res.length>0){
-  //         console.log(req.body.username + " berhasil ditemukan");
-  //     }else if(err){
-  //         return next(err);
-  //     }else{
-  //         console.log("Tidak ditemukan")
-  //     }
-
-  // })  
-
 }
 
-//Contoh
-// exports.test = function(req,res){
-//     res.send("ini udah bener komunikasi model control dan routes")
-// }
+exports.getAllUsers = async function (req, res) {
+  try {
+    let allUsers = await userModels.find().exec()
+    console.log(allUsers)
+    return res.status(201).send({ users: allUsers })
+  } catch (err) {
+    console.log(err.message)
+    return res.status(500).send({ error: err.message })
+  }
+}
 
-// exports.create = function(req,res){
-//     let todos = new Todos({
-//         name : req.body.name,
-//         done: false
-//     });
-
-//     todos.save(function(err){
-//         if(err){
-//             return next(err)
-//         }
-//     res.send("sukses nge mantab")
-//     })  
-
-// };
-
+exports.getUser = async function (req, res) {
+  try {
+    let user = await userModels.findById(id)
+    if (user) return res.status(201).send(user)
+    else res.status(404).send({ error: 'user not found' })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).send({ error: error.message })
+  }
+}

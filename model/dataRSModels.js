@@ -10,4 +10,4 @@ const DataRSModels = Schema({
     updatedAt: { type: Date, default: Date.now }
 })
 
-module.exports = mongoose.model("dataDesa", DataRSModels)
+module.exports = mongoose.model("dataRS", DataRSModels)

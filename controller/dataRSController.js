@@ -4,6 +4,8 @@ const dataRSModels = require("../model/dataRSModels")
 
 exports.createDataRS = async function (req, res) {
     try {
+        let searchResult = await dataRSModels.find({nama_rumahSakit: req.body.nama_rumahSakit})
+        if(searchResult.length >= 1) return res.status(406).send({message: 'Nama RS Sudah ada'})
         let firstData = await dataRSModels.create({
             nama_rumahSakit: req.body.nama_rumahSakit,
             jumlahKamarUmum: req.body.jumlahKamarUmum,
@@ -20,7 +22,7 @@ exports.createDataRS = async function (req, res) {
 
 exports.updateDataRS = async function (req, res) {
     try {
-        let updatedData = await dataRSModels.findByIdAndUpdate(req.params.dataRSId, {
+        let updatedData = await dataRSModels.findByIdAndUpdate(req.body._id, {
             jumlahKamarUmum: req.body.jumlahKamarUmum,
             jumlahKamarCovid: req.body.jumlahKamarCovid,
             jumlahNakes: req.body.jumlahNakes,

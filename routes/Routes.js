@@ -64,9 +64,9 @@ router.post("/report/post-photo",checkAuth, uploadProof.single('photo'), report.
 
 //RS ROUTES
 router.post("/data-rs/create-first", dataRS.createDataRS )
-router.put("/data-rs/update-data/:dataRSId",checkAuth, dataRS.updateDataRS )
-router.get("/data-rs/get-data",checkAuth, dataRS.getDataRS )
-router.get("/data-rs/get-one-data/:dataRSId",checkAuth, dataRS.getOneDataRS )
+router.put("/data-rs/update-data",checkAuth, dataRS.updateDataRS )
+router.get("/data-rs/get-data", dataRS.getDataRS )
+router.get("/data-rs/get-one-data/:dataRSId", dataRS.getOneDataRS )
 
 //ACCOUNT ROUTE
 router.post("/account/register", account.register);

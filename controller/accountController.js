@@ -50,14 +50,16 @@ exports.login = function (req, res) {
     .exec()
     .then(result => {
       if (result.length < 1) {
-        return res.status(401).json({
-          message: "Email tidak ditemukan"
+        console.log("Email tidak ditemukan")
+        return res.status(404).send({
+          error: "Email tidak ditemukan"
         });
       }
       bcrypt.compare(req.body.password, result[0].password, (err) => {
         if (err) {
-          return res.status(401).json({
-            message: "Auth failed"
+          console.log("Auth failed")
+          return res.status(401).send({
+            error: "Auth failed"
           });
         }
         if (result) {
@@ -78,7 +80,8 @@ exports.login = function (req, res) {
               expiresIn: "6h"
             }
           );
-          return res.status(201).json({
+          console.log(token)
+          return res.status(201).send({
             nomorIndukKependudukan: result[0].nomorIndukKependudukan,
             namaPanjang: result[0].namaPanjang,
             email: result[0].email,
@@ -86,10 +89,11 @@ exports.login = function (req, res) {
             jenisKelamin: result[0].jenisKelamin,
             kotaLahir: result[0].kotaLahir,
             tanggalLahir: result[0].tanggalLahir,
-            role: result[0].role
+            role: result[0].role,
+            token: token
           });
         } else {
-          res.status(401).json({
+          res.status(401).send({
             message: "Authentication failed"
           });
         }
@@ -97,7 +101,7 @@ exports.login = function (req, res) {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({
+      return res.status(500).send({
         error: err
       });
     });

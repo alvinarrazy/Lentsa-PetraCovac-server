@@ -56,3 +56,13 @@ exports.getOneDataRS = async function (req, res){
         return res.status(500).send({ error: error.message })
     }
 }
+
+exports.deleteData = async function (req, res){
+    try {
+        let deletedData = await dataRSModels.findByIdAndDelete(req.params.dataRSId)
+        if(deletedData) return res.status(201).send(deletedData)
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).send({ error: error.message })
+    }
+}

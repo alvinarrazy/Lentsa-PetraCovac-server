@@ -3,5 +3,5 @@ module.exports = {
   CLIENT_ID: '348861256775-kj6ks0s92vo1g52rv7lpo89a2jra9es2.apps.googleusercontent.com',
   CLIENT_SECRET: 'jKgbS9w-F_nFPeDu41ogh6LT',
   REDIRECT_URI: 'https://developers.google.com/oauthplayground',
-  REFRESH_TOKEN: '1//04q5tT-ZzdQE8CgYIARAAGAQSNwF-L9IrvscnxbzeRKngJP371gi5knRjBlSVibceT5wk9VZSxQMHFlVQlo8zweiYqgwDpzbfsB4'
+  REFRESH_TOKEN: '1//04-ZhZkHciOxcCgYIARAAGAQSNwF-L9Ir5O8_8b2e5Yu_NnbhowAP0Yr3kTKUeu_W8eESCMq6g9dDahkvXfaOdN9ng4fa7B1cgw4'
 }

@@ -67,6 +67,7 @@ router.post("/data-rs/create-first", dataRS.createDataRS )
 router.put("/data-rs/update-data",checkAuth, dataRS.updateDataRS )
 router.get("/data-rs/get-data", dataRS.getDataRS )
 router.get("/data-rs/get-one-data/:dataRSId", dataRS.getOneDataRS )
+router.delete("/data-rs/delete-data/:dataRSId", dataRS.deleteData )
 
 //ACCOUNT ROUTE
 router.post("/account/register", account.register);

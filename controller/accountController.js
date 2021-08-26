@@ -109,7 +109,7 @@ exports.login = function (req, res) {
 
 exports.getAllUsers = async function (req, res) {
   try {
-    let allUsers = await userModels.find().exec()
+    let allUsers = await userModels.find()
     console.log(allUsers)
     return res.status(201).send({ users: allUsers })
   } catch (err) {
@@ -120,8 +120,22 @@ exports.getAllUsers = async function (req, res) {
 
 exports.getUser = async function (req, res) {
   try {
-    let user = await userModels.findById(id)
+    let user = await userModels.findById(req.params.userId)
     if (user) return res.status(201).send(user)
+    else res.status(404).send({ error: 'user not found' })
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).send({ error: error.message })
+  }
+}
+
+exports.findUser = async function (req, res){
+  try {
+    let findResult = await userModels.find({
+      nomorIndukKependudukan: req.body.nomorIndukKependudukan,
+      namaPanjang: req.body.namaPanjang
+    })
+    if (findResult) return res.status(201).send(findResult)
     else res.status(404).send({ error: 'user not found' })
   } catch (error) {
     console.log(error.message)

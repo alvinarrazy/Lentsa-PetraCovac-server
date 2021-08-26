@@ -72,6 +72,9 @@ router.delete("/data-rs/delete-data/:dataRSId", dataRS.deleteData )
 //ACCOUNT ROUTE
 router.post("/account/register", account.register);
 router.post("/account/login", account.login);
+router.get("/account/get-all-users", account.getAllUsers);
+router.get("/account/get-user/:userId", account.getAllUsers);
+router.post("/account/find-users", account.findUser);
 
 //TESTING ROUTES
 router.get("/", testing.testLive);

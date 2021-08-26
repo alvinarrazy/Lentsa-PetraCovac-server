@@ -132,8 +132,10 @@ exports.getUser = async function (req, res) {
 exports.findUser = async function (req, res){
   try {
     let findResult = await userModels.find({
-      nomorIndukKependudukan: req.body.nomorIndukKependudukan,
-      namaPanjang: req.body.namaPanjang
+      "$or": [
+        {nomorIndukKependudukan: /req.body.nomorIndukKependudukan/i},
+        {namaPanjang: /req.body.namaPanjang/i}
+      ]
     })
     if (findResult) return res.status(201).send(findResult)
     else res.status(404).send({ error: 'user not found' })

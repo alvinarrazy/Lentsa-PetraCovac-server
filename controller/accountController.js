@@ -131,14 +131,26 @@ exports.getUser = async function (req, res) {
 
 exports.findUser = async function (req, res){
   try {
-    let findResult = await userModels.find({
-      "$or": [
-        {nomorIndukKependudukan: /req.body.nomorIndukKependudukan/i},
-        {namaPanjang: /req.body.namaPanjang/i}
-      ]
-    })
-    if (findResult) return res.status(201).send(findResult)
-    else res.status(404).send({ error: 'user not found' })
+    if(req.body.nomorIndukKependudukan && req.body.namaPanjang){
+      let findResult = await userModels.find({
+        "nomorIndukKependudukan": { "$regex": req.body.nomorIndukKependudukan, "$options": "i" },
+        "namaPanjang":  { "$regex": req.body.namaPanjang, "$options": "i" }
+      })
+      if (findResult) return res.status(201).send(findResult)
+      else res.status(404).send({ error: 'user not found' })
+    }else if(req.body.nomorIndukKependudukan && !req.body.namaPanjang){
+      let findResult = await userModels.find({
+        "nomorIndukKependudukan": { "$regex": req.body.nomorIndukKependudukan, "$options": "i" }
+      })
+      if (findResult) return res.status(201).send(findResult)
+      else res.status(404).send({ error: 'user not found' })
+    }else{
+      let findResult = await userModels.find({
+        "namaPanjang":  { "$regex": req.body.namaPanjang, "$options": "i" }
+      })
+      if (findResult) return res.status(201).send(findResult)
+      else res.status(404).send({ error: 'user not found' })
+    }
   } catch (error) {
     console.log(error.message)
     return res.status(500).send({ error: error.message })

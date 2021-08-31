@@ -156,3 +156,21 @@ exports.findUser = async function (req, res){
     return res.status(500).send({ error: error.message })
   }
 }
+
+exports.deleteUser = async function(req, res){
+  try {
+    let userAboutToBeDeleted = await userModels.findById(req.params.userId)
+    if(userAboutToBeDeleted[0].role === 'admin'){
+      let userDeleted = await userModels.findByIdAndDelete(req.params.userId)
+      if(userDeleted){
+        return res.status(201).send(userDeleted)
+      }
+      else return res.status(404).send({error: 'user not found'})
+    }else{
+      return res.status(401).send({error: 'forbidden to delete an admin'})
+    }
+  } catch (error) {
+    console.log(error.message)
+    return res.status(500).send({ error: error.message })
+  }
+}

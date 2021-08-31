@@ -75,6 +75,7 @@ router.post("/account/login", account.login);
 router.get("/account/get-all-users", account.getAllUsers);
 router.get("/account/get-user/:userId", account.getAllUsers);
 router.post("/account/find-users", account.findUser);
+router.delete("/account/delete-user/:userId",checkAuth, account.deleteUser);
 
 //TESTING ROUTES
 router.get("/", testing.testLive);

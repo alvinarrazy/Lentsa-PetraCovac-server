@@ -160,7 +160,7 @@ exports.findUser = async function (req, res){
 exports.deleteUser = async function(req, res){
   try {
     let userAboutToBeDeleted = await userModels.findById(req.params.userId)
-    if(userAboutToBeDeleted[0].role === 'admin'){
+    if(userAboutToBeDeleted[0].role === 'user'){
       let userDeleted = await userModels.findByIdAndDelete(req.params.userId)
       if(userDeleted){
         return res.status(201).send(userDeleted)

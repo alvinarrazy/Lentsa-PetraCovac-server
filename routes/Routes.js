@@ -39,6 +39,7 @@ const account = require("../controller/accountController");
 const report = require("../controller/laporanController");
 const dataRS = require("../controller/dataRSController");
 const testing = require("../controller/testController");
+const stokDarah = require("../controller/stokDarahController")
 
 //COVID ROUTES
 router.post("/covid/tambah-kecamatan",checkAuth, covid.tambahKecamatan); 
@@ -76,6 +77,12 @@ router.get("/account/get-all-users", account.getAllUsers);
 router.get("/account/get-user/:userId", account.getAllUsers);
 router.post("/account/find-users", account.findUser);
 router.delete("/account/delete-user/:userId",checkAuth, account.deleteUser);
+
+//STOK DARAH ROUTE
+router.get("/stok-darah/get-all", stokDarah.getStokDarah)
+router.post("/stok-darah/add-new", checkAuth, stokDarah.addStokDarah)
+router.put("/stok-darah/edit-stok", checkAuth, stokDarah.editStokDarah)
+router.delete("/stok-darah/delete/:dataId", checkAuth, stokDarah.deleteStokDarah)
 
 //TESTING ROUTES
 router.get("/", testing.testLive);

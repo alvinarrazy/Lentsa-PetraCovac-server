@@ -164,33 +164,33 @@ exports.confirmReport = async function (req, res) {
       console.log(laporan)
       switch(laporan){
         case 'Gejala':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statuscovid: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusCovid: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
           break
         case 'Positif':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statuscovid: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusCovid: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Sembuh':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statuscovid: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusCovid: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 1 kali':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statusvaksin: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusVaksin: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 2 kali':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statusvaksin: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusVaksin: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 3 kali':
-          userModels.findOneAndUpdate({nik: idPelapor}, {
-            statusvaksin: laporan
+          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+            statusVaksin: laporan
           }).then(result=> console.log(result)).catch(error => console.log(error.message))
         default:
       }    

@@ -1,4 +1,3 @@
-const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, REFRESH_TOKEN } = require('../config')
 const dataRSModels = require("../model/dataRSModels")
 
 

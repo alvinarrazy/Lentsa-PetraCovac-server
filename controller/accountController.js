@@ -20,7 +20,9 @@ exports.register = async function (req, res) {
         kotaLahir: req.body.kotaLahir,
         tanggalLahir: req.body.tanggalLahir,
         password: hash,
-        role: "user"
+        role: "user",
+        statusVaksin:'Belum Vaksin',
+        statusCovid:'Belum Terpapar',
       });
       let result = await newUser.save()
       if (result) {
@@ -160,7 +162,7 @@ exports.findUser = async function (req, res){
 exports.deleteUser = async function(req, res){
   try {
     let userAboutToBeDeleted = await userModels.findById(req.params.userId)
-    if(userAboutToBeDeleted[0].role === 'user'){
+    if(userAboutToBeDeleted.role === 'user'){
       let userDeleted = await userModels.findByIdAndDelete(req.params.userId)
       if(userDeleted){
         return res.status(201).send(userDeleted)

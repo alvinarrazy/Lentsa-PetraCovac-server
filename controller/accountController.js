@@ -10,6 +10,7 @@ exports.register = async function (req, res) {
     if (findNik.length >= 1) return res.status(409).send({ message: "NIK telah terdaftar" })
     if (findEmail.length >= 1) return res.status(409).send({ message: "Email telah terdaftar" })
     try {
+      let birthDate = new Date(req.body.tanggalLahir)
       let hash = await bcrypt.hash(req.body.password, 12)
       let newUser = new userModels({
         nomorIndukKependudukan: req.body.nomorIndukKependudukan,
@@ -18,8 +19,18 @@ exports.register = async function (req, res) {
         noTelp: req.body.noTelp,
         jenisKelamin: req.body.jenisKelamin,
         kotaLahir: req.body.kotaLahir,
-        tanggalLahir: req.body.tanggalLahir,
+        tanggalLahir: birthDate.toLocaleDateString(),
         password: hash,
+        provinsiDiKTP: req.body.provinsiDiKTP,
+        kotaDiKTP: req.body.kotaDiKTP,
+        kecamatanDiKTP: req.body.kecamatanDiKTP,
+        kelurahanDiKTP: req.body.kelurahanDiKTP,
+        alamatDiKTP: req.body.alamatDiKTP,
+        provinsiDomisili: req.body.provinsiDiKTP,
+        kotaDomisili: req.body.kotaDomisili,
+        kecamatanDomisili: req.body.kecamatanDiKTP,
+        kelurahanDomisili: req.body.kelurahanDomisili,
+        alamatDomisili: req.body.alamatDiDomisili,
         role: "user",
         statusVaksin:'Belum Vaksin',
         statusCovid:'Belum Terpapar',
@@ -29,12 +40,7 @@ exports.register = async function (req, res) {
         return res.status(201).send({
           nomorIndukKependudukan: result.nomorIndukKependudukan,
           namaPanjang: result.namaPanjang,
-          email: result.email,
-          noTelp: result.noTelp,
-          jenisKelamin: result.jenisKelamin,
-          kotaLahir: result.kotaLahir,
-          tanggalLahir: result.tanggalLahir,
-          role: result.role
+          email: result.email
         })
       }
     } catch (error) {
@@ -82,7 +88,6 @@ exports.login = function (req, res) {
               expiresIn: "6h"
             }
           );
-          console.log(token)
           return res.status(201).send({
             nomorIndukKependudukan: result[0].nomorIndukKependudukan,
             namaPanjang: result[0].namaPanjang,

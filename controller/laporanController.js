@@ -23,7 +23,7 @@ const drive = google.drive({
 exports.createReport = async function (req, res) {
   try {
     const filePath = path.join(req.file.path);
-    if(filePath){
+    if (filePath) {
       const photo = await drive.files.create({
         requestBody: {
           name: req.body.nik_pelapor + '--' + req.body.nama_pelapor + '--' + new Date().toISOString().replace(/:/g, '-') + '.jpg', //This can be name of your choice
@@ -47,10 +47,30 @@ exports.createReport = async function (req, res) {
         fileId: fileId,
         fields: 'webContentLink',
       });
+      let dataPelapor = await userModels.find({
+        nomorIndukKependudukan: req.body.nik_pelapor,
+        namaPanjang: req.body.nama_pelapor
+      })
+      console.log(dataPelapor)
+      if (!dataPelapor || dataPelapor.length === 0) return res.status(404).send({ message: 'Data user tidak ditemukan' })
+      console.log('disini')
       let newPost = new LaporanModels({
         nik_pelapor: req.body.nik_pelapor,
         nama_pelapor: req.body.nama_pelapor,
         laporan: req.body.laporan,
+        email_pelapor: dataPelapor[0].email,
+        jenisKelamin: dataPelapor[0].jenisKelamin,
+        provinsiDiKTP: dataPelapor[0].provinsiDiKTP,
+        kotaDiKTP: dataPelapor[0].kotaDiKTP,
+        kecamatanDiKTP: dataPelapor[0].kecamatanDiKTP,
+        kelurahanDiKTP: dataPelapor[0].kelurahanDiKTP,
+        alamatDiKTP: dataPelapor[0].alamatDiKTP,
+        provinsiDomisili: dataPelapor[0].provinsiDomisili,
+        kotaDomisili: dataPelapor[0].kotaDomisili,
+        kecamatanDomisili: dataPelapor[0].kecamatanDomisili,
+        kelurahanDomisili: dataPelapor[0].kelurahanDomisili,
+        alamatDomisili: dataPelapor[0].alamatDomisili,
+        noTelp: dataPelapor[0].noTelp,
         keterangan: req.body.keterangan,
         photoId: fileId,
         viewPhotoURL: `https://drive.google.com/uc?export=view&id=${fileId}`,
@@ -75,7 +95,7 @@ exports.createReport = async function (req, res) {
           return res.status(500).json({
             error: err.message
           });
-        });    
+        });
     }
   } catch (error) {
     console.log(error.message);
@@ -102,8 +122,21 @@ exports.getAllReports = function (req, res) {
             laporan: doc.laporan,
             photoId: doc.photoId,
             keterangan: doc.keterangan,
+            email_pelapor: doc.email_pelapor,
             viewPhotoURL: doc.viewPhotoURL,
-            downloadPhotoURL: doc.downloadPhotoURL
+            downloadPhotoURL: doc.downloadPhotoURL,
+            jenisKelamin: doc.jenisKelamin,
+            provinsiDiKTP: doc.provinsiDiKTP,
+            kotaDiKTP: doc.kotaDiKTP,
+            kecamatanDiKTP: doc.kecamatanDiKTP,
+            kelurahanDiKTP: doc.kelurahanDiKTP,
+            alamatDiKTP: doc.alamatDiKTP,
+            provinsiDomisili: doc.provinsiDomisili,
+            kotaDomisili: doc.kotaDomisili,
+            kecamatanDomisili: doc.kecamatanDomisili,
+            kelurahanDomisili: doc.kelurahanDomisili,
+            alamatDomisili: doc.alamatDomisili,
+            noTelp: doc.noTelp,
           };
         })
       };
@@ -126,19 +159,32 @@ exports.getAllReports = function (req, res) {
 exports.getReport = function (req, res) {
   const id = req.params.reportId;
   LaporanModels.findById(id)
-    .select('nik_pelapor nama_pelapor laporan keterangan viewPhotoURL downloadPhotoURL photoId')
     .exec()
     .then(doc => {
       if (doc) {
+        console.log(doc)
         return res.status(200).json({
           _id: doc._id,
           nik_pelapor: doc.nik_pelapor,
           nama_pelapor: doc.nama_pelapor,
+          email_pelapor: doc.email_pelapor,
           laporan: doc.laporan,
           photoId: doc.photoId,
           keterangan: doc.keterangan,
           viewPhotoURL: doc.viewPhotoURL,
-          downloadPhotoURL: doc.downloadPhotoURL
+          downloadPhotoURL: doc.downloadPhotoURL,
+          jenisKelamin: doc.jenisKelamin,
+          provinsiDiKTP: doc.provinsiDiKTP,
+          kotaDiKTP: doc.kotaDiKTP,
+          kecamatanDiKTP: doc.kecamatanDiKTP,
+          kelurahanDiKTP: doc.kelurahanDiKTP,
+          alamatDiKTP: doc.alamatDiKTP,
+          provinsiDomisili: doc.provinsiDomisili,
+          kotaDomisili: doc.kotaDomisili,
+          kecamatanDomisili: doc.kecamatanDomisili,
+          kelurahanDomisili: doc.kelurahanDomisili,
+          alamatDomisili: doc.alamatDomisili,
+          noTelp: doc.noTelp,
         });
       } else {
         return res
@@ -160,40 +206,40 @@ exports.confirmReport = async function (req, res) {
 
   LaporanModels.findByIdAndDelete(id)
     .exec()
-    .then( async (doc) => {
+    .then(async (doc) => {
       console.log(laporan)
-      switch(laporan){
+      switch (laporan) {
         case 'Gejala':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusCovid: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
           break
         case 'Positif':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusCovid: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Sembuh':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusCovid: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 1 kali':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusVaksin: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 2 kali':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusVaksin: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
           break
         case 'Sudah Vaksin 3 kali':
-          userModels.findOneAndUpdate({nomorIndukKependudukan: idPelapor}, {
+          userModels.findOneAndUpdate({ nomorIndukKependudukan: idPelapor }, {
             statusVaksin: laporan
-          }).then(result=> console.log(result)).catch(error => console.log(error.message))
+          }).then(result => console.log(result)).catch(error => console.log(error.message))
         default:
-      }    
+      }
       const response = await drive.files.delete({
         fileId: report.photoId
       })

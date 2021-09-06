@@ -59,7 +59,8 @@ router.delete("/covid/delete-desa/:idDesa",checkAuth, covid.deleteDesa);
 //REPORT ROUTES
 router.post("/report/submit-report",checkAuth, uploadProof.single('photo'), report.createReport)
 router.get("/report/get-report/:reportId", report.getReport)
-router.put("/report/confirm-report/:reportId", report.confirmReport)
+router.put("/report/confirm-report/:reportId",checkAuth, report.confirmReport)
+router.delete("/repprt/delete-report/:reportId",checkAuth, report.deleteReport)
 router.get("/report/get-all-reports", report.getAllReports)
 router.post("/report/post-photo",checkAuth, uploadProof.single('photo'), report.uploadPhoto)
 

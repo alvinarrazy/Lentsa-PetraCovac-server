@@ -110,7 +110,6 @@ exports.uploadPhoto = async function (req, res) {
 
 exports.getAllReports = function (req, res) {
   LaporanModels.find()
-    .select("nik_pelapor nama_pelapor laporan keterangan viewPhotoURL downloadPhotoURL photoId")//sesuai sama model
     .then(docs => {
       const response = {
         count: docs.length,
@@ -123,9 +122,9 @@ exports.getAllReports = function (req, res) {
             photoId: doc.photoId,
             keterangan: doc.keterangan,
             email_pelapor: doc.email_pelapor,
+            jenisKelamin: doc.jenisKelamin,
             viewPhotoURL: doc.viewPhotoURL,
             downloadPhotoURL: doc.downloadPhotoURL,
-            jenisKelamin: doc.jenisKelamin,
             provinsiDiKTP: doc.provinsiDiKTP,
             kotaDiKTP: doc.kotaDiKTP,
             kecamatanDiKTP: doc.kecamatanDiKTP,
@@ -137,10 +136,12 @@ exports.getAllReports = function (req, res) {
             kelurahanDomisili: doc.kelurahanDomisili,
             alamatDomisili: doc.alamatDomisili,
             noTelp: doc.noTelp,
+            postedDate: doc.postedDate
           };
         })
       };
       if (docs.length >= 0) {
+        console.log(response)
         return res.status(200).json(response);
       } else {
         res.status(404).json({
@@ -162,7 +163,6 @@ exports.getReport = function (req, res) {
     .exec()
     .then(doc => {
       if (doc) {
-        console.log(doc)
         return res.status(200).json({
           _id: doc._id,
           nik_pelapor: doc.nik_pelapor,
@@ -260,4 +260,21 @@ exports.confirmReport = async function (req, res) {
       console.log(err);
       return res.status(500).json({ error: err });
     });
+}
+
+exports.deleteReport = async function (req, res) {
+  try {
+    const id = req.params.reportId;
+    const report = await LaporanModels.findById(id)
+    const deletedReport = await LaporanModels.findByIdAndDelete(id)
+    const response = await drive.files.delete({
+      fileId: report.photoId
+    })
+    console.log(deletedReport)
+    if (deletedReport && response) return res.status(201).send({ deletedReport: deletedReport })
+    else return res.status(404).send({ message: 'laporan tidak ditemukan' })
+  } catch (error) {
+    console.log(error.message)
+    return res.status.send({ error: error.message })
+  }
 }

@@ -62,7 +62,7 @@ router.get("/report/get-report/:reportId", report.getReport)
 router.put("/report/confirm-report/:reportId",checkAuth, report.confirmReport)
 router.delete("/repprt/delete-report/:reportId",checkAuth, report.deleteReport)
 router.get("/report/get-all-reports", report.getAllReports)
-router.post("/report/post-photo",checkAuth, uploadProof.single('photo'), report.uploadPhoto)
+// router.post("/report/post-photo",checkAuth, uploadProof.single('photo'), report.uploadPhoto)
 
 //RS ROUTES
 router.post("/data-rs/create-first", dataRS.createDataRS )
